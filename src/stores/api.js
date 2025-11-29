@@ -3,7 +3,7 @@ import axios from 'axios'
 
 // Create axios instance with defaults
 const api = axios.create({
-  baseURL: 'https://vehiclerental.infinityfreeapp.com/v1',
+  baseURL: 'https://vehiclerental.infinityfreeapp.com/api',
   headers: {
     'Content-Type': 'application/json'
   },
