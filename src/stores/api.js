@@ -18,7 +18,7 @@ const api = axios.create({
   timeout: 30000,
   
   // Allow credentials (cookies, authorization headers) - enable if needed
-  withCredentials: false
+  withCredentials: true
 })
 
 // Add response interceptor for consistent error handling
