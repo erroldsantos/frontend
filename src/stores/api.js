@@ -2,12 +2,23 @@ import { defineStore } from 'pinia'
 import axios from 'axios'
 
 // Create axios instance with defaults
+// IMPORTANT: Update baseURL when deploying to production
 const api = axios.create({
-  baseURL: 'https://vehiclerental.infinityfreeapp.com/api',
+  // For production with separate hosting, use your backend URL
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://vehiclerental.infinityfreeapp.com/api',
+  
+  // For local development, use:
+  // baseURL: 'http://localhost/Vehicle-Rental/api',
+  
   headers: {
     'Content-Type': 'application/json'
   },
-  withCredentials: true
+  
+  // Timeout for requests (optional)
+  timeout: 30000,
+  
+  // Allow credentials (cookies, authorization headers) - enable if needed
+  withCredentials: false
 })
 
 // Add response interceptor for consistent error handling

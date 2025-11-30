@@ -43,6 +43,10 @@
             <label>Daily Rate (₱)</label>
             <input v-model="newVehicle.daily_rate" class="form-input" type="number" step="0.01" required placeholder="2000.00" />
           </div>
+          <div class="form-group">
+            <label>Vehicle Image</label>
+            <input @change="handleImageUpload($event, 'new')" class="form-input" type="file" accept="image/*" />
+          </div>
         </div>
         <div class="form-actions">
           <button type="submit" class="action-btn">
@@ -92,6 +96,11 @@
               <option value="rented">Rented</option>
               <option value="maintenance">Maintenance</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label>Vehicle Image</label>
+            <input @change="handleImageUpload($event, 'edit')" class="form-input" type="file" accept="image/*" />
+            <small v-if="editingVehicle.image" style="color: #666; display: block; margin-top: 4px;">Current: {{ editingVehicle.image }}</small>
           </div>
         </div>
         <div class="form-actions">
@@ -171,7 +180,8 @@ export default {
       year: new Date().getFullYear(),
       plate_number: '',
       daily_rate: '',
-      status: 'available'
+      status: 'available',
+      image: null
     })
 
     const editingVehicle = ref({
@@ -181,8 +191,20 @@ export default {
       year: '',
       plate_number: '',
       daily_rate: '',
-      status: 'available'
+      status: 'available',
+      image: null
     })
+
+    const handleImageUpload = (event, formType) => {
+      const file = event.target.files[0]
+      if (file) {
+        if (formType === 'new') {
+          newVehicle.value.image = file
+        } else if (formType === 'edit') {
+          editingVehicle.value.image = file
+        }
+      }
+    }
 
     const loadVehicles = async () => {
       loading.value = true
@@ -210,17 +232,22 @@ export default {
 
     const addVehicle = async () => {
       try {
-        const vehicleData = {
-          brand: newVehicle.value.brand,
-          model: newVehicle.value.model,
-          year: parseInt(newVehicle.value.year),
-          plate_number: newVehicle.value.plate_number,
-          daily_rate: parseFloat(newVehicle.value.daily_rate),
-          status: newVehicle.value.status
+        const formData = new FormData()
+        formData.append('brand', newVehicle.value.brand)
+        formData.append('model', newVehicle.value.model)
+        formData.append('year', parseInt(newVehicle.value.year))
+        formData.append('plate_number', newVehicle.value.plate_number)
+        formData.append('daily_rate', parseFloat(newVehicle.value.daily_rate))
+        formData.append('status', newVehicle.value.status)
+        
+        if (newVehicle.value.image) {
+          formData.append('image', newVehicle.value.image)
         }
         
-        console.log('Adding vehicle:', vehicleData)
-        const response = await apiStore.post('/vehicles', vehicleData)
+        console.log('Adding vehicle with FormData')
+        const response = await apiStore.post('/vehicles', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
         console.log('Add vehicle response:', response)
         
         vehicles.value.unshift(response)
@@ -242,7 +269,8 @@ export default {
         year: new Date().getFullYear(),
         plate_number: '',
         daily_rate: '',
-        status: 'available'
+        status: 'available',
+        image: null
       }
     }
 
@@ -257,7 +285,8 @@ export default {
         year: vehicle.year,
         plate_number: vehicle.plate_number,
         daily_rate: vehicle.daily_rate,
-        status: vehicle.status
+        status: vehicle.status,
+        image: vehicle.image || null
       }
       
       // Show the edit form and hide add form
@@ -267,17 +296,22 @@ export default {
 
     const updateVehicle = async () => {
       try {
-        const vehicleData = {
-          brand: editingVehicle.value.brand,
-          model: editingVehicle.value.model,
-          year: parseInt(editingVehicle.value.year),
-          plate_number: editingVehicle.value.plate_number,
-          daily_rate: parseFloat(editingVehicle.value.daily_rate),
-          status: editingVehicle.value.status
+        const formData = new FormData()
+        formData.append('brand', editingVehicle.value.brand)
+        formData.append('model', editingVehicle.value.model)
+        formData.append('year', parseInt(editingVehicle.value.year))
+        formData.append('plate_number', editingVehicle.value.plate_number)
+        formData.append('daily_rate', parseFloat(editingVehicle.value.daily_rate))
+        formData.append('status', editingVehicle.value.status)
+        
+        if (editingVehicle.value.image instanceof File) {
+          formData.append('image', editingVehicle.value.image)
         }
         
-        console.log('Updating vehicle:', editingVehicle.value.id, vehicleData)
-        const response = await apiStore.put(`/vehicles/${editingVehicle.value.id}`, vehicleData)
+        console.log('Updating vehicle:', editingVehicle.value.id)
+        const response = await apiStore.put(`/vehicles/${editingVehicle.value.id}`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        })
         console.log('Update vehicle response:', response)
         
         // Update the vehicle in the local list
@@ -305,7 +339,8 @@ export default {
         year: '',
         plate_number: '',
         daily_rate: '',
-        status: 'available'
+        status: 'available',
+        image: null
       }
     }
 
@@ -360,6 +395,7 @@ export default {
       vehicles,
       newVehicle,
       editingVehicle,
+      handleImageUpload,
       loadVehicles,
       addVehicle,
       cancelAdd,
