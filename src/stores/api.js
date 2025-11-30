@@ -5,7 +5,7 @@ import axios from 'axios'
 // IMPORTANT: Update baseURL when deploying to production
 const api = axios.create({
   // For production with separate hosting, use your backend URL
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://vehiclerental.infinityfreeapp.com/api',
+  baseURL:'https://vehiclerental.infinityfreeapp.com/api',
   
   // For local development, use:
   // baseURL: 'http://localhost/Vehicle-Rental/api',
